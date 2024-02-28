@@ -15,8 +15,6 @@ class Pacman(Problem):
 
     def find_pacman(self, state):
         # Finds pacman and returns the position in the grid
-
-        
         for i, row in enumerate(state.grid):
             for j, cell in enumerate(row):
                 if cell == 'P':  # Pacman found
@@ -44,6 +42,7 @@ class Pacman(Problem):
                 x += move_x
                 y += move_y
 
+                # checks for bounds and walls
                 if not (0 <= x < bound_x and 0 <= y < bound_y) or grid[x][y] == '#':
                     break
                 steps += 1
@@ -52,17 +51,49 @@ class Pacman(Problem):
         return actions
                     
 
-        
-
-
-
-
-
-
-
     def result(self, state, action):
-        # Apply the action to the state and return the new state
-        pass
+        # copy of the grid because tuples are immutable
+        new_grid = [list(row) for row in state.grid]
+
+        pacman_pos = self.find_pacman(state)
+
+        direction, steps = action
+
+        if direction == "UP":
+            new_x = pacman_pos[0] - steps
+            new_y = pacman_pos[1]
+
+        elif direction == "DOWN":
+            new_x = pacman_pos[0] + steps
+            new_y = pacman_pos[1]
+
+        elif direction == "LEFT":
+            new_x = pacman_pos[0]
+            new_y = pacman_pos[1] - steps
+
+        else :
+            new_x = pacman_pos[0]
+            new_y = pacman_pos[1] + steps
+
+        # update grid
+        new_grid[pacman_pos[0]][pacman_pos[1]] = '.'
+
+        # updates fruit count if it was a fruit
+        fruit_count = state.answer
+        if new_grid[new_x][new_y] == 'F':
+            fruit_count-=1
+
+        new_grid[new_x][new_y] = 'P'
+
+        # update move
+
+        move_made = "Move to ({}, {})".format(new_x,new_y)
+
+        # checks for goal state 
+
+        if fruit_count == 0 : move_made = move_made + " Goal State"
+
+        return State(state.shape, tuple([tuple(row) for row in new_grid]), fruit_count, move_made)
         
     def goal_test(self, state):
     	#check for goal state
@@ -107,16 +138,16 @@ if __name__ == "__main__":
 
     shape, initial_grid, initial_fruit_count = read_instance_file(filepath)
     #print(read_instance_file(filepath))
-    initial_grid2 = [('.', 'P', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '.', '.', '#', '#', '#', '#', '#', '.', '.', '.', '.'), ('.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '#', '#', '.', '.', '.', '.', '#', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '#', '#', '#', '.', '.', '.', '.', '.', '.')]
+    #initial_grid2 = [('.', 'P', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '.', '.', '#', '#', '#', '#', '#', '.', '.', '.', '.'), ('.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '#', '#', '.', '.', '.', '.', '#', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '#', '#', '#', '.', '.', '.', '.', '.', '.')]
     init_state = State(shape, tuple(initial_grid), initial_fruit_count, "Init")
     #print(str(init_state))
     
     problem = Pacman(init_state)
 
-    print(problem.actions(problem.initial))
-    print(init_state)
+    #actions = problem.actions(problem.initial)
+    #print(problem.result(problem.initial,actions[0]))
+    #print(init_state)
     
-    """
 
     # Example of search
     start_timer = time.perf_counter()
@@ -133,4 +164,4 @@ if __name__ == "__main__":
     print("* Execution time:\t", str(end_timer - start_timer))
     print("* Path cost to goal:\t", node.depth, "moves")
     print("* #Nodes explored:\t", nb_explored)
-    print("* Queue size at goal:\t",  remaining_nodes)"""
+    print("* Queue size at goal:\t",  remaining_nodes)
