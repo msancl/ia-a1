@@ -26,14 +26,32 @@ class Pacman(Problem):
         actions = []
         grid = state.grid
         pacman_pos = self.find_pacman(state)
-        max_x = state.shape(0)
-        max_y = state.shape(1)
+        bound_x = state.shape[0]
+        bound_y = state.shape[1]
 
         directions = {
             'UP': (-1, 0),
             'DOWN': (1, 0),
             'LEFT': (0, -1),
             'RIGHT': (0, 1),}
+        
+        for direction, (move_x, move_y) in directions.items():
+
+            steps = 0
+            x, y = pacman_pos
+
+            while True:
+                x += move_x
+                y += move_y
+
+                if not (0 <= x < bound_x and 0 <= y < bound_y) or grid[x][y] == '#':
+                    break
+                steps += 1
+                actions.append((direction, steps))
+
+        return actions
+                    
+
         
 
 
@@ -95,7 +113,8 @@ if __name__ == "__main__":
     
     problem = Pacman(init_state)
 
-    print(problem.find_pacman(problem.initial))
+    print(problem.actions(problem.initial))
+    print(init_state)
     
     """
 
