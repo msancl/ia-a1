@@ -24,6 +24,8 @@ class Pacman(Problem):
         actions = []
         grid = state.grid
         pacman_pos = self.find_pacman(state)
+
+        # boundaries of the map
         bound_x = state.shape[0]
         bound_y = state.shape[1]
 
@@ -33,6 +35,7 @@ class Pacman(Problem):
             'LEFT': (0, -1),
             'RIGHT': (0, 1),}
         
+        # checks for each direction for how many steps we can go 
         for direction, (move_x, move_y) in directions.items():
 
             steps = 0
@@ -46,6 +49,8 @@ class Pacman(Problem):
                 if not (0 <= x < bound_x and 0 <= y < bound_y) or grid[x][y] == '#':
                     break
                 steps += 1
+
+                # adds each action
                 actions.append((direction, steps))
 
         return actions
@@ -58,6 +63,8 @@ class Pacman(Problem):
         pacman_pos = self.find_pacman(state)
 
         direction, steps = action
+
+        # gets new pacman coordinates according to the action 
 
         if direction == "UP":
             new_x = pacman_pos[0] - steps
@@ -93,6 +100,7 @@ class Pacman(Problem):
 
         if fruit_count == 0 : move_made = move_made + " Goal State"
 
+        # returns new state
         return State(state.shape, tuple([tuple(row) for row in new_grid]), fruit_count, move_made)
         
     def goal_test(self, state):
@@ -119,6 +127,12 @@ class State:
         for line in self.grid:
             s += "".join(line) + "\n"
         return s
+    
+    def __hash__(self):
+        return hash(self.grid)
+
+    def __eq__(self, other):
+        return self.grid == other.grid
 
 
 def read_instance_file(filepath):
@@ -137,21 +151,14 @@ if __name__ == "__main__":
     filepath = sys.argv[1]
 
     shape, initial_grid, initial_fruit_count = read_instance_file(filepath)
-    #print(read_instance_file(filepath))
-    #initial_grid2 = [('.', 'P', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '.', '.', '#', '#', '#', '#', '#', '.', '.', '.', '.'), ('.', '.', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '#', '#', '.', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'), ('.', '#', '#', '.', '.', '.', '.', '#', '.', '.', '.', '.', '.'), ('.', '#', '.', '.', '#', '#', '#', '.', '.', '.', '.', '.', '.')]
     init_state = State(shape, tuple(initial_grid), initial_fruit_count, "Init")
-    #print(str(init_state))
     
     problem = Pacman(init_state)
-
-    #actions = problem.actions(problem.initial)
-    #print(problem.result(problem.initial,actions[0]))
-    #print(init_state)
     
 
     # Example of search
     start_timer = time.perf_counter()
-    node, nb_explored, remaining_nodes = breadth_first_tree_search(problem)
+    node, nb_explored, remaining_nodes = depth_first_graph_search(problem)
     end_timer = time.perf_counter()
 
     # Example of print
